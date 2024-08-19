@@ -63,6 +63,19 @@ void debug(T* a, T* b, Q* res_sw, Q* res_hw, bool cnv = 0) {
     debug(a, b, res_sw, res_hw, true); \
     return cmp(res_hw, res_sw, (M - C + 1) * (N - C + 1)); \
 
+#define VS_TEST_BASE(DTYPE, ACC, REF) \
+    DTYPE a[M * N]; \
+    DTYPE b = 2; \
+    DTYPE res_sw[M * N], res_hw[M * N]; \
+    init(a, N, M); \
+    MA_DEFINE_##DTYPE(0, N, M); \
+    MA_DEFINE_##DTYPE(1, N, M); \
+    MA_LOAD_REGISTER(0, a); \
+    MA_VS_##ACC(1, 0, b); \
+    MA_STORE_REGISTER(1, res_hw); \
+    REF(a, b, res_sw, M, N); \
+    return cmp(res_hw, res_sw, M * N); \
+
 #define ADD_TEST_BASE(DTYPE_I, DTYPE_O) TEST_BASE(DTYPE_I, DTYPE_O, MA_VV_ADD, add)
 #define SUB_TEST_BASE(DTYPE_I, DTYPE_O) TEST_BASE(DTYPE_I, DTYPE_O, MA_VV_SUB, sub)
 #define DIV_TEST_BASE(DTYPE_I, DTYPE_O) TEST_BASE(DTYPE_I, DTYPE_O, MA_VV_DIV, div)
@@ -76,13 +89,22 @@ void debug(T* a, T* b, Q* res_sw, Q* res_hw, bool cnv = 0) {
 #define SMULT_TEST(DTYPE) bool smult_test_##DTYPE() { SMULT_TEST_BASE(DTYPE, DTYPE) }
 #define CNV_TEST(DTYPE) bool cnv_test_##DTYPE() { CNV_TEST_BASE(DTYPE, DTYPE) }
 
+#define VS_ADD_TEST(DTYPE) bool vs_add_test_##DTYPE() { VS_TEST_BASE(DTYPE, ADD, vs_add) }
+#define VS_SUB_TEST(DTYPE) bool vs_sub_test_##DTYPE() { VS_TEST_BASE(DTYPE, SUB, vs_sub) }
+#define VS_DIV_TEST(DTYPE) bool vs_div_test_##DTYPE() { VS_TEST_BASE(DTYPE, DIV, vs_div) }
+#define VS_MULT_TEST(DTYPE) bool vs_mult_test_##DTYPE() { VS_TEST_BASE(DTYPE, MULT, vs_mult) }
+
 #define GROUP_TEST(DTYPE) \
     ADD_TEST(DTYPE) \
     SUB_TEST(DTYPE) \
     DIV_TEST(DTYPE) \
     MULT_TEST(DTYPE) \
     SMULT_TEST(DTYPE) \
-    CNV_TEST(DTYPE)
+    CNV_TEST(DTYPE) \
+    VS_ADD_TEST(DTYPE) \
+    VS_SUB_TEST(DTYPE) \
+    VS_DIV_TEST(DTYPE) \
+    VS_MULT_TEST(DTYPE)
 
 GROUP_TEST(int8_t);
 GROUP_TEST(uint8_t);
@@ -97,7 +119,11 @@ GROUP_TEST(uint32_t);
     MY_TEST(Division, DTYPE, div_test_##DTYPE) \
     MY_TEST(Multiplication, DTYPE, mult_test_##DTYPE) \
     MY_TEST(SMultiplication, DTYPE, smult_test_##DTYPE) \
-    MY_TEST(Convolution, DTYPE, cnv_test_##DTYPE)
+    MY_TEST(Convolution, DTYPE, cnv_test_##DTYPE) \
+    MY_TEST(VS_Addition, DTYPE, vs_add_test_##DTYPE) \
+    MY_TEST(VS_Substraction, DTYPE, vs_sub_test_##DTYPE) \
+    MY_TEST(VS_Division, DTYPE, vs_div_test_##DTYPE) \
+    MY_TEST(VS_Multiplication, DTYPE, vs_mult_test_##DTYPE)
 
 int main() {
     MY_INIT

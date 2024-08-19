@@ -88,4 +88,16 @@ void print(T *ptr, int w, int h) {
     }
 }
 
+#define VECTOR_SCALAR_OPERATION_FN(NAME, OP) \
+template <typename T, typename Q> \
+void vs_##NAME(T *a, int b, Q *c, int m, int n) { \
+    for (int i = 0; i < m * n; ++i) \
+            c[i] = a[i] OP b; \
+} 
+
+VECTOR_SCALAR_OPERATION_FN(add, +);
+VECTOR_SCALAR_OPERATION_FN(sub, -);
+VECTOR_SCALAR_OPERATION_FN(div, /);
+VECTOR_SCALAR_OPERATION_FN(mult, *);
+
 #endif
