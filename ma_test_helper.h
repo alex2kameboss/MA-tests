@@ -17,6 +17,10 @@
 #define P 6
 #endif
 
+#ifndef C
+#define C 2
+#endif
+
 #include <cstdlib>
 #include <cstdio>
 
@@ -60,6 +64,20 @@ SCALAR_OPERATION_FN(add, +);
 SCALAR_OPERATION_FN(sub, -);
 SCALAR_OPERATION_FN(div, /);
 SCALAR_OPERATION_FN(smult, *);
+
+template <typename T, typename Q>
+void cnv(T* a, T* b, Q* c, int m_a, int n_a, int m_b, int n_b) {
+    int m_c = m_a - m_b + 1;
+    int n_c = n_a - n_b + 1;
+    for ( int i = 0; i < m_c; ++i ) {
+        for ( int j = 0; j < n_c; ++j ) {
+            c[ i * n_c + j ] = 0;
+            for ( int ii = 0; ii < m_b; ++ii ) 
+                for ( int jj = 0; jj < n_b; ++jj )
+                    c[ i * n_c + j ] += a[ (i + ii) * m_a + j + jj ] * b[ ii * m_b + jj ];
+        }
+    }
+}
 
 template <typename T>
 void print(T *ptr, int w, int h) {

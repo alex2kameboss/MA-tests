@@ -12,6 +12,6 @@ build: clean
 test: build
 	$(RISCV_SIM) pk ma_test
 
-debug: CXXFLAGS:= -D DEBUG -D N=2 -D M=2 -D P=2
+debug: CXXFLAGS:= -D DEBUG -D N=3 -D M=3 -D P=3
 debug: build
 	$(RISCV_SIM) pk ma_test

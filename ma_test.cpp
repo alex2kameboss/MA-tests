@@ -7,16 +7,27 @@
 #include <iomanip>
 
 template <typename T, typename Q>
-void debug(T* a, T* b, Q* res_sw, Q* res_hw) {
+void debug(T* a, T* b, Q* res_sw, Q* res_hw, bool cnv = 0) {
 #ifdef DEBUG
-    printf("\na = \n");
-    print(a, N, M);
-    printf("b = \n");
-    print(b, P, N);
-    printf("sw = \n");
-    print(res_sw, P, M);
-    printf("hw = \n");
-    print(res_hw, P, M);
+    if ( cnv ) {
+        printf("\na = \n");
+        print(a, N, M);
+        printf("b = \n");
+        print(b, C, C);
+        printf("sw = \n");
+        print(res_sw, M - C + 1, M - C + 1);
+        printf("hw = \n");
+        print(res_hw, M - C + 1, M - C + 1);
+    } else {
+        printf("\na = \n");
+        print(a, N, M);
+        printf("b = \n");
+        print(b, P, N);
+        printf("sw = \n");
+        print(res_sw, P, M);
+        printf("hw = \n");
+        print(res_hw, P, M);
+    }
 #endif
 }
 
@@ -36,6 +47,22 @@ void debug(T* a, T* b, Q* res_sw, Q* res_hw) {
     debug(a, b, res_sw, res_hw); \
     return cmp(res_hw, res_sw, M * P); \
 
+#define CNV_TEST_BASE(DTYPE_I, DTYPE_O)  \
+    DTYPE_I a[M * N], b[C * C]; \
+    DTYPE_O res_sw[(M - C + 1) * (N - C + 1)], res_hw[(M - C + 1) * (N - C + 1)]; \
+    init(a, N, M); \
+    init(b, C, C); \
+    MA_DEFINE_##DTYPE_I(0, N, M); \
+    MA_DEFINE_##DTYPE_I(1, C, C); \
+    MA_DEFINE_##DTYPE_O(2, (N - C + 1), (M - C + 1)); \
+    MA_LOAD_REGISTER(0, a); \
+    MA_LOAD_REGISTER(1, b); \
+    MA_VV_CNV(2, 0, 1); \
+    MA_STORE_REGISTER(2, res_hw); \
+    cnv(a, b, res_sw, M, N, C, C); \
+    debug(a, b, res_sw, res_hw, true); \
+    return cmp(res_hw, res_sw, (M - C + 1) * (N - C + 1)); \
+
 #define ADD_TEST_BASE(DTYPE_I, DTYPE_O) TEST_BASE(DTYPE_I, DTYPE_O, MA_VV_ADD, add)
 #define SUB_TEST_BASE(DTYPE_I, DTYPE_O) TEST_BASE(DTYPE_I, DTYPE_O, MA_VV_SUB, sub)
 #define DIV_TEST_BASE(DTYPE_I, DTYPE_O) TEST_BASE(DTYPE_I, DTYPE_O, MA_VV_DIV, div)
@@ -47,13 +74,15 @@ void debug(T* a, T* b, Q* res_sw, Q* res_hw) {
 #define DIV_TEST(DTYPE) bool div_test_##DTYPE() { DIV_TEST_BASE(DTYPE, DTYPE) }
 #define MULT_TEST(DTYPE) bool mult_test_##DTYPE() { MULT_TEST_BASE(DTYPE, DTYPE) }
 #define SMULT_TEST(DTYPE) bool smult_test_##DTYPE() { SMULT_TEST_BASE(DTYPE, DTYPE) }
+#define CNV_TEST(DTYPE) bool cnv_test_##DTYPE() { CNV_TEST_BASE(DTYPE, DTYPE) }
 
 #define GROUP_TEST(DTYPE) \
     ADD_TEST(DTYPE) \
     SUB_TEST(DTYPE) \
     DIV_TEST(DTYPE) \
     MULT_TEST(DTYPE) \
-    SMULT_TEST(DTYPE) 
+    SMULT_TEST(DTYPE) \
+    CNV_TEST(DTYPE)
 
 GROUP_TEST(int8_t);
 GROUP_TEST(uint8_t);
@@ -68,6 +97,7 @@ GROUP_TEST(uint32_t);
     MY_TEST(Division, DTYPE, div_test_##DTYPE) \
     MY_TEST(Multiplication, DTYPE, mult_test_##DTYPE) \
     MY_TEST(SMultiplication, DTYPE, smult_test_##DTYPE) \
+    MY_TEST(Convolution, DTYPE, cnv_test_##DTYPE)
 
 int main() {
     MY_INIT
