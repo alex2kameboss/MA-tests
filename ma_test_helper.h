@@ -63,13 +63,11 @@ SCALAR_OPERATION_FN(smult, *);
 
 template <typename T>
 void print(T *ptr, int w, int h) {
-#ifdef DEBUG
     for (int i = 0; i < h; ++i) {
         for (int j = 0; j < w; ++j)
             printf("%d ", ptr[i * w + j]);
         printf("\n");
     }
-#endif
 }
 
 #endif
