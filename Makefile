@@ -1,7 +1,7 @@
-RISCV_PATH=~/RISCV/bin
+RISCV_PATH=../install/bin
 RISCV_GCC=$(RISCV_PATH)/riscv64-unknown-elf-gcc
 RISCV_GXX=$(RISCV_PATH)/riscv64-unknown-elf-g++
-RISCV_SIM=~/riscv-isa-sim/build/spike
+RISCV_SIM=../MA-riscv-isa-sim/build/spike
 
 clean:
 	rm -f test1_sim ma_test
