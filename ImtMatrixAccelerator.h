@@ -54,12 +54,21 @@
         ); \
     })
 
+#define MA_LOC_RECT(ID, X, Y) ({ \
+    asm volatile \
+    ( \
+        "v2dloc.rect x" _STR(ID) " , %[x], %[y]\n\t" \
+        : \
+        : [x] "r" (X), [y] "r" (Y) \
+    ); \
+})
+
 #define MA_LOAD_REGISTER(ID, PTR) ({ \
         asm volatile \
         ( \
             "v2dld x" _STR(ID) ", %[x]\n\t" \
             : \
-            : [x] "m" (PTR) \
+            : [x] "o" (PTR) \
         ); \
     })
 
@@ -68,7 +77,7 @@
         ( \
             "v2dst x" _STR(ID) ", %[x]\n\t" \
             : \
-            : [x] "m" (PTR) \
+            : [x] "o" (PTR) \
         ); \
     })
 
